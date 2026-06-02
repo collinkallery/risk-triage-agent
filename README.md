@@ -56,6 +56,7 @@ agent/
   agent.py          ReAct loop; Trace data structures; GeminiClient + MockClient
   system_prompt.py  The triage system prompt (stance, protocol, anti-patterns, worked example)
   tools.py          Three tools: lookup_rubric, search_reference, resolve_escalation
+  triage.py         Ad-hoc CLI: classify a single narrative (inference counterpart to the runner)
 eval/
   runner.py         Runs the agent over the eval set; writes a results JSON
   scoring.py        Deterministic scoring (cost matrices, precision/recall, aggregates)
@@ -101,6 +102,46 @@ python -m eval.report results/run_<timestamp>_all_dry_scored.json
 Reports land in `reports/`; raw and scored run data land in `results/`. Both directories
 are git-ignored.
 
+## Ad-hoc classification
+
+The eval harness runs the agent over the *labeled* eval set and scores it. To classify a
+single arbitrary narrative instead — no eval set, no ground truth required — use the
+`agent.triage` CLI. It is the inference counterpart to the runner: it calls the same
+`run_agent` loop on one narrative and prints the classification.
+
+```bash
+# Inline text
+python -m agent.triage --text "I can't keep doing this anymore."
+
+# From a file, with the full reasoning trace
+python -m agent.triage --file note.txt --show-trace
+
+# Piped via stdin
+echo "five years ago I was in a dark place; I'm okay now" | python -m agent.triage
+
+# Machine-readable output
+python -m agent.triage --text "..." --json
+```
+
+Classifying real text requires a live Gemini call (see *Running against a live model*
+below for credentials). Pass `--mock` to exercise the CLI plumbing with a fixed
+placeholder and no API call — useful for checking wiring, but the placeholder does **not**
+reflect the input, so never read a `--mock` result as a real classification.
+
+Because ad-hoc input has no ground-truth label, this path is pure inference: no scoring
+and no judge. As a convenience for quick "did it get this one right?" checks, you can pass
+an expected category and/or frame, which scores just that single case against the rubric's
+cost matrices (category and subject-frame dimensions only — criteria/tool F1 and the
+reasoning judge require the full harness):
+
+```bash
+python -m agent.triage --text "..." --expected 1 --expected-frame first_person
+```
+
+Output goes to stdout and diagnostics to stderr, so `--json` pipes cleanly. The exit code
+is `0` on a successful classification, `1` if the agent produced none (or the live client
+failed to initialize), and `2` on missing/invalid input.
+
 ## Tests
 
 The suite is fully mock-based — it runs with no credentials and no network — and is
@@ -125,6 +166,10 @@ gcloud auth application-default login
 # Judge (Anthropic Claude — the default cross-model judge)
 export ANTHROPIC_API_KEY=sk-ant-...
 
+# Classify a single narrative live
+python -m agent.triage --text "I have the pills counted out for tonight." --show-trace
+
+# Or run the full eval
 python -m eval.runner --ablation=all
 python -m eval.score   results/run_<timestamp>_all.json
 python -m eval.report  results/run_<timestamp>_all_scored.json
