@@ -1,0 +1,32 @@
+# =============================================================================
+# Project Configuration
+# =============================================================================
+# Single source of truth for runner defaults. CLI flags can override any of
+# these at run time.
+# =============================================================================
+
+model:
+  name: "gemini-2.5-pro"
+  temperature: 0.0
+  max_iterations: 6
+  max_input_token_budget: 50000
+
+# LLM-as-judge for reasoning quality. Default is a cross-model judge:
+# Claude grading the Gemini agent removes same-model shared bias.
+# provider: anthropic (cross-model, default) | gemini (same family) | mock (offline)
+judge:
+  provider: "anthropic"
+  model: "claude-sonnet-4-6"
+  temperature: 0.0
+
+paths:
+  eval_set: "data/eval_set.jsonl"
+  rubric: "data/rubric.yaml"
+  reference_corpus: "data/reference_corpus.yaml"
+  results_dir: "results"
+  reports_dir: "reports"
+
+ablation_modes:
+  all: ["lookup_rubric", "search_reference", "resolve_escalation"]
+  rubric_only: ["lookup_rubric"]
+  none: []

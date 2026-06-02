@@ -1,0 +1,9 @@
+# Core runtime dependencies
+PyYAML>=6.0
+
+# Live model providers. Not required for --dry-run, --mock-judge, or
+# smoke_test.py, which run without any API calls.
+#   google-genai → the Gemini agent (and the optional same-family judge)
+#   anthropic    → the default cross-model Claude judge
+google-genai>=0.3.0
+anthropic>=0.40.0

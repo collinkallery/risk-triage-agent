@@ -1,0 +1,195 @@
+# =============================================================================
+# Reference Corpus for Behavioral Risk Triage Agent
+# =============================================================================
+# Used by the search_reference tool. Each doc is a short, focused note on a
+# clinical principle, category boundary, or common misclassification. The
+# agent retrieves these by keyword/title match; the corpus is intentionally
+# small (~12 docs) so retrieval can be exact-match or simple ranking.
+#
+# In a production system this would be a vector DB over a much larger corpus.
+# This is a deliberate stub: see README.md for production scaling notes.
+# =============================================================================
+
+docs:
+
+  - id: "ref_001"
+    title: "Cat 1 vs Cat 2: the role of intent, plan, means, timeframe"
+    keywords: ["category 1", "category 2", "imminent", "ideation", "boundary", "intent", "plan", "means"]
+    content: >
+      The defining distinction between Cat 1 (Imminent Risk) and Cat 2
+      (Active Ideation, Non-Imminent) is the presence of intent, plan,
+      means, OR timeframe. Cat 2 narratives describe current thoughts about
+      self-harm or non-existence but lack at least one of these elements,
+      and often include explicit disavowal ("I'd never actually"). Cat 1
+      narratives present at least one of the four elements — they do not
+      need all four. A narrative with current ideation plus a specific
+      means is Cat 1, even without a stated timeframe. A narrative with
+      current ideation and explicit disavowal is Cat 2, even if the
+      narrator describes the thoughts as frequent or distressing.
+
+  - id: "ref_002"
+    title: "Deliberate vs euphemistic Cat 1: same category, different state"
+    keywords: ["category 1", "deliberate", "euphemistic", "sub-pattern", "1-deliberate", "1-euphemistic", "1e"]
+    content: >
+      Cat 1 has two sub-patterns reflecting distinct states of mind.
+      Deliberate (1a/1b/1c/1d) presentations are explicit, committed, often
+      planful — the narrator states intent, means, or timeframe directly.
+      Euphemistic (1e) presentations imply finality through indirect
+      language ("I won't be a problem much longer," "everyone will be
+      better off," "I'm tired of being here"). Both route to immediate
+      escalation but the provider response differs: deliberate presentations
+      warrant direct safety planning; euphemistic presentations typically
+      warrant more elicitation up front, because the narrator may be
+      ambivalent or testing whether the listener will engage. Both
+      sub-patterns are equally serious.
+
+  - id: "ref_003"
+    title: "Cat 3 structural signature: past difficulty plus present different state"
+    keywords: ["category 3", "historical", "recovery", "3a", "3b", "temporal contrast", "past tense"]
+    content: >
+      Cat 3 (Historical/Recovery) requires BOTH past-tense reference to
+      struggle AND present-tense statement of a different current state.
+      Past difficulty alone is not Cat 3 — it could be Cat 4 (distress) if
+      no self-harm content is referenced, or Cat 2 (active ideation) if
+      the past content reactivates in the present. Common Cat 3 markers
+      include explicit anniversary framing, gratitude statements about
+      having received help, statements oriented toward helping others
+      ("sharing this in case it helps someone else"), and explicit absence
+      of current ideation ("haven't had a thought like that in over a
+      year"). The presence of heavy past-tense trigger language
+      (methods, plans, attempts) does NOT promote the category if the
+      present-tense different-state signal is clearly present.
+
+  - id: "ref_004"
+    title: "Cat 3 reactivation trap: when past plus present means Cat 2"
+    keywords: ["category 3", "category 2", "reactivation", "boundary", "3a", "3b"]
+    content: >
+      A narrative can open with the Cat 3 structural signature (past-tense
+      difficulty plus temporal distance markers) and then flip to Cat 2 in
+      a later sentence if the present-tense content reactivates rather than
+      contrasts with the past. Example structure: "Five years ago I was in
+      a really dark place. Honestly some days lately it feels like I'm
+      right back there." The first sentence reads Cat 3; the second
+      sentence makes the narrative Cat 2 because 3b fails — there is no
+      present-tense different state. Always read the full narrative before
+      committing to Cat 3.
+
+  - id: "ref_005"
+    title: "Cat 4 vs Cat 1: the unantecedented-metaphor rule"
+    keywords: ["category 4", "category 1", "boundary", "antecedent", "metaphor", "intensity", "1e", "4d"]
+    content: >
+      Intensity language ("I can't do this anymore," "I'm done," "I need
+      it to stop") is common in Cat 4 (distress without risk indicators)
+      and does NOT promote to Cat 1 on its own — criterion 4d covers this.
+      However: if a finality metaphor lacks a concrete antecedent in the
+      narrative (no specific situation, relationship, job, or context
+      named as the referent), the clinical default is to treat the
+      referent as life itself, escalating to 1e. Example: "I want off the
+      ride" with no preceding context about what "the ride" is → Cat 1
+      euphemistic. Same phrase preceded by "this divorce" or "this job"
+      → Cat 4 intensity language. The disambiguator is grammatical
+      antecedent, not tone or surrounding voice.
+
+  - id: "ref_006"
+    title: "Cat 4 vs Cat 1: euphemism in mundane voice"
+    keywords: ["category 4", "category 1", "boundary", "1e", "mundane", "under-flagging"]
+    content: >
+      Euphemistic finality language (1e) can appear inside casual,
+      mundane, or even humorous narratives. The surrounding voice does NOT
+      neutralize the embedded signal. A message that closes with "wine
+      and bed" or "ordering takeout" can still contain 1e content earlier
+      in the same message. When in doubt about whether a casual narrative
+      contains buried 1e signal, the structural test from ref_005 (does
+      the finality phrasing have a concrete antecedent?) is the primary
+      tool. If the answer is uncertain, route to Cat 5 rather than
+      defaulting to Cat 4 on tone.
+
+  - id: "ref_007"
+    title: "Cat 5 is structural, not a default for uncertainty"
+    keywords: ["category 5", "ambiguous", "calibration", "5a", "5b", "5c"]
+    content: >
+      Cat 5 (Ambiguous / Insufficient Information) has structural criteria:
+      5a (signal present that could be Cat 1 OR Cat 2), 5b (disambiguating
+      criteria absent or unclear), 5c (cannot confidently distinguish from
+      content alone). Cat 5 is NOT the right answer for general uncertainty
+      about category placement. If a narrative has the full signature of
+      Cat 2 (current ideation + disavowal + no plan/means/timeframe),
+      commit to Cat 2 even if some peripheral detail is unclear. Reserve
+      Cat 5 for cases where the content genuinely could be Cat 1 or Cat 2
+      and the disambiguating signal is absent or contradictory.
+
+  - id: "ref_008"
+    title: "Subject frame: content first, frame separately"
+    keywords: ["subject frame", "third party", "first person", "disclosure scaffold", "frame"]
+    content: >
+      Category is determined by the CONTENT of the narrative. Subject
+      frame describes the narrator's grammatical relationship to that
+      content and is reported separately. Content meeting Cat 1 criteria
+      is Cat 1 regardless of whether the narrator is describing themselves
+      or a third party. Third-party framing does NOT downgrade the
+      category. What changes is the action path: first_person Cat 1
+      routes to standard immediate escalation; third_party_clear routes
+      to bystander-track escalation; third_party_ambiguous routes to
+      dual-track (bystander resources AND narrator check-in).
+
+  - id: "ref_009"
+    title: "Disclosure scaffold suspicion: signals and the rule against resolving"
+    keywords: ["third party", "ambiguous", "disclosure scaffold", "frame", "suspicion"]
+    content: >
+      A "disclosure scaffold" is when a narrator describes content
+      nominally about a third party but is in fact describing their own
+      state. Signals that warrant third_party_ambiguous framing include:
+      unusual specificity inconsistent with bystander knowledge of the
+      "third party"; emotional intensity inconsistent with bystander
+      framing; vague or unspecified third-party identity ("a friend,"
+      "someone I know"); narrator's own present-tense emotional state
+      elevated alongside the report. CRITICAL: the agent must NOT attempt
+      to resolve whether the third party is real. The agent reports the
+      surface frame, and the dual-track action path accounts for the
+      ambiguity. Trying to resolve this from the surface produces false
+      confidence in either direction.
+
+  - id: "ref_010"
+    title: "Fictional and creative frames"
+    keywords: ["fiction", "creative", "writing", "fictional frame", "category 4", "over-flagging"]
+    content: >
+      Narratives can reference self-harm content within explicit
+      fictional or creative-work frames — e.g., a writer describing a
+      novel's plot, a screenwriter discussing a scene, an artist
+      describing source material. When the fictional frame is explicit
+      and the narrator's own present-tense emotional state is consistent
+      with the frame (engagement with craft, frustration with the work
+      itself, etc.), the category should reflect the narrator's state,
+      not the fictional content. Most such cases land in Cat 4 (work
+      distress or creative frustration) rather than any risk category.
+      The fictional frame is NOT a free pass — if the narrator's own
+      emotional state has separate risk signals, those are scored on
+      their own merits, independent of the fictional content.
+
+  - id: "ref_011"
+    title: "Meta-uncertainty as a Cat 5 signal"
+    keywords: ["category 5", "meta-uncertainty", "ambivalence", "calibration"]
+    content: >
+      Narrators sometimes express their own uncertainty about what they
+      are describing: "I don't really know what I mean by that," "I'm
+      probably fine, nevermind," "is it normal to think about this?"
+      This meta-uncertainty is itself a clinical signal. It often
+      accompanies genuinely ambiguous content where the narrator is
+      partially disclosing while testing the listener. These cases meet
+      Cat 5's structural criteria and should be routed accordingly. Do
+      NOT downgrade to Cat 4 because the narrator is hedging — the
+      hedging is part of the signal, not evidence against it.
+
+  - id: "ref_012"
+    title: "Clinical case notes: subject frame and weighting"
+    keywords: ["clinical case note", "third party clear", "frame", "case note"]
+    content: >
+      Clinical case notes are typically third_party_clear by structure —
+      a clinician documenting a patient. The narrator (clinician) is a
+      bystander reporter; the subject is the patient. The category is
+      determined by the patient's content as described in the note, not
+      by the clinician's tone. Historical context in case notes (prior
+      attempts, prior diagnoses) informs urgency but does NOT promote
+      current presentation: a patient currently presenting with passive
+      SI and denial of plan is Cat 2 even with a historical attempt
+      noted, though the action path may warrant heightened attention.
