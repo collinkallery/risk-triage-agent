@@ -56,6 +56,7 @@ agent/
   agent.py          ReAct loop; Trace data structures; GeminiClient + MockClient
   system_prompt.py  The triage system prompt (stance, protocol, anti-patterns, worked example)
   tools.py          Three tools: lookup_rubric, search_reference, resolve_escalation
+  retrieval.py      Retrieval backends for search_reference: keyword + vector (embeddings) + cache
   triage.py         Ad-hoc CLI: classify a single narrative (inference counterpart to the runner)
 eval/
   runner.py         Runs the agent over the eval set; writes a results JSON
@@ -64,6 +65,7 @@ eval/
   score.py          Orchestrates deterministic + judge scoring into a scored JSON
   report.py         Renders a scored run as a markdown report
   ablation.py       Compares scored runs across tool configurations
+  compare_retrieval.py  Compares scored runs across retrieval backends (keyword vs. vector)
 data/
   rubric.yaml            Source of truth: criteria, examples, cost matrices
   reference_corpus.yaml  Small corpus for the search_reference tool
@@ -175,7 +177,8 @@ python -m eval.score   results/run_<timestamp>_all.json
 python -m eval.report  results/run_<timestamp>_all_scored.json
 ```
 
-Useful runner flags: `--limit=5` (first N cases), `--output=...` (custom path).
+Useful runner flags: `--limit=5` (first N cases), `--retrieval=vector` (semantic
+retrieval backend; see *Retrieval* below), `--output=...` (custom path).
 Useful scorer flags: `--no-judge` (skip the judge entirely), `--mock-judge` (offline
 judge), `--judge-provider {anthropic,gemini,mock}` and `--judge-model <id>` (override the
 `judge:` block in `config.yaml`).
@@ -233,13 +236,46 @@ python -m eval.ablation \
 
 The full-tools run is treated as the baseline and deltas are computed against it.
 
+## Retrieval: keyword vs. vector (RAG)
+
+The `search_reference` tool retrieves from a small reference corpus, and its ranking
+backend is swappable behind a common `Retriever` interface (`agent/retrieval.py`):
+
+- **keyword** (default) — token-overlap ranking. No credentials; what tests and CI use.
+- **vector** — embedding cosine similarity. Corpus vectors are embedded once via Vertex
+  (the same GCP credentials as the agent) and cached to disk, keyed by a fingerprint of
+  the embedding model plus corpus content so the cache self-invalidates on any change.
+  Only the query is embedded per call thereafter.
+
+Because this is an eval project, the point isn't just to add semantic retrieval — it's to
+**measure whether it actually beats keyword.** Run the same eval set under each backend,
+score both, and compare:
+
+```bash
+python -m eval.runner --ablation all --retrieval keyword
+python -m eval.runner --ablation all --retrieval vector
+# score both runs, then:
+python -m eval.compare_retrieval \
+    --keyword results/run_<ts>_all_scored.json \
+    --vector  results/run_<ts>_all_vector_scored.json
+```
+
+The comparison report covers headline and per-dimension deltas, slices by tag and category,
+and a **retrieval-invoked segment** — metrics restricted to the cases where the agent
+actually called `search_reference`, since cases that never query retrieval can't be affected
+by which backend ran. On a corpus this small and lexically tidy, vector retrieval may not
+beat keyword by much; that null result is itself a finding about when RAG earns its cost,
+not a failure. The `agent.triage` CLI also accepts `--retrieval vector` for ad-hoc use.
+
 ## Possible next steps
 
 - Expand the taxonomy toward fuller clinical coverage (harm-to-others, substance-acute,
   minors), each with its own criteria and cost rows.
 - Add a second human rater to a slice of the eval set and report inter-rater agreement
   alongside the model's scores.
-- Replace the keyword `search_reference` stub with real vector retrieval.
+- Add retrieval-quality metrics (precision@k / recall@k / MRR) for the vector retriever
+  by labeling which corpus docs are relevant per eval case — turning the keyword-vs-vector
+  comparison from end-to-end accuracy into a direct measurement of retrieval quality.
 - Add a panel/ensemble judge (multiple providers voting) on top of the existing
   cross-model judge.
 

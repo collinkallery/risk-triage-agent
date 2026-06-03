@@ -30,3 +30,14 @@ ablation_modes:
   all: ["lookup_rubric", "search_reference", "resolve_escalation"]
   rubric_only: ["lookup_rubric"]
   none: []
+
+# Retrieval backend for the search_reference tool.
+#   keyword (default) — token-overlap ranking, no credentials, used by tests/CI.
+#   vector            — embedding cosine similarity via Vertex (same GCP creds as
+#                       the agent). Corpus vectors are cached to cache_path.
+# Select at run time with `--retrieval vector` on the runner or triage CLI.
+retrieval:
+  mode: "keyword"
+  embedding_model: "text-embedding-004"   # verify the current Vertex model id
+  embedding_dimensions: null               # null = model default; or e.g. 768
+  cache_path: "results/reference_embeddings.json"
